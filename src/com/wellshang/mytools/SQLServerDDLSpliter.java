@@ -15,12 +15,22 @@ import java.util.regex.Pattern;
 
 public class SQLServerDDLSpliter {
 
-	private static final String ddlFilePath = "F:\\Temp";
-	private static final String ddlFileName = "dll_example.sql";
-	private static List<String> statementList = null;
-	private static Map<String, List<String>> groupMap = null;
+	private String ddlFilePath;
+	private String ddlFileName;
+	private List<String> statementList;
+	private Map<String, List<String>> groupMap;
 
-	private static void loadStatements() {
+	public SQLServerDDLSpliter(String path, String file) {
+		this.ddlFilePath = path;
+		this.ddlFileName = file;
+	}
+
+	private void loadStatements() {
+		if (ddlFilePath == null || ddlFileName == null) {
+			System.out.println("Invalid parameters.");
+			return;
+		}
+
 		try {
 			String strStatement = "";
 			String strLine = "";
@@ -42,7 +52,7 @@ public class SQLServerDDLSpliter {
 		}
 	}
 
-	private static void getGroups() {
+	private void getGroups() {
 		groupMap = new HashMap<String, List<String>>();
 		List<String> statements = new ArrayList<String>();
 		for (String st : statementList) {
@@ -68,7 +78,7 @@ public class SQLServerDDLSpliter {
 		}
 	}
 
-	private static void doGrouping() {
+	private void doGrouping() {
 		for (Map.Entry<String, List<String>> entry : groupMap.entrySet()) {
 			String group = entry.getKey();
 			List<String> statements = entry.getValue();
@@ -83,10 +93,13 @@ public class SQLServerDDLSpliter {
 		}
 	}
 
-	private static void generateGroupedFiles() {
+	private void generateGroupedFiles() {
 		for (Map.Entry<String, List<String>> entry : groupMap.entrySet()) {
 			String group = entry.getKey();
 			List<String> statements = entry.getValue();
+			
+			System.out.println("Group: " + group);
+			
 			if (!group.equals("OTHERS")) {
 				try {
 					String filePath = ddlFilePath + "\\" + group + ".sql";
@@ -118,23 +131,28 @@ public class SQLServerDDLSpliter {
 						FileOutputStream out = new FileOutputStream(file, true);
 						st += "\r\n";
 						out.write(st.getBytes("utf-8"));
+						index++;
 						System.out.println("  |");
-						System.out.println("  ---Statement: " + st);
+						System.out.println("  ---Procedure: " + st);
 						out.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 			}
-			System.out.println("Group: " + group);
 		}
 	}
 
-	public static void main(String[] args) {
+	public void split() {
 		loadStatements();
 		getGroups();
 		doGrouping();
 		generateGroupedFiles();
+	}
+
+	public static void main(String[] args) {
+		SQLServerDDLSpliter spliter = new SQLServerDDLSpliter("F:\\Temp", "dll_example.sql");
+		spliter.split();
 	}
 
 }
