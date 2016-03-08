@@ -1,0 +1,32 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+  
+sourceCompatibility = 1.8
+version = '1.0'
+jar {
+	manifest {
+		attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+	}
+}
+  
+repositories {
+	mavenCentral()
+}
+  
+dependencies {
+	compile 'commons-codec:commons-codec:1.10'
+	testCompile 'org.testng:testng:6.9.10'
+	testCompile 'junit:junit:4.12'
+}
+
+test {
+//	useTestNG()
+	scanForTestClasses = false
+	exclude 'com/wellshang/mytools/BlockingQueueTest.class'
+	exclude 'com/wellshang/utils/*.class'
+}
+
+task copyJars(type:Copy){
+	from configurations.runtime
+	into 'libs'
+}
